@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>เก็บเงินซื้อของ ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        
+        .goal-item {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+            margin-bottom: 16px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .goal-image-container {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 16px;
+        }
+        .goal-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .goal-details {
+            flex-grow: 1;
+        }
+        .add-new-goal-btn {
+            width: 100%;
+            background-color: #6d28d9;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            text-align: center;
+        }
+        .popup label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #374151;
+        }
+        .popup input[type="number"],
+        .popup input[type="file"],
+        .popup input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        .popup button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .popup button.confirm {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .popup button.cancel {
+            background-color: #f44336;
+            color: white;
+        }
+        .goal-actions button {
+            background-color: #a78bfa;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 8px;
+        }
+        .goal-actions button:hover {
+            background-color: #7c3aed;
+        }
+        .goal-details-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 11;
+            text-align: center;
+        }
+        .goal-details-popup h2 {
+            color: #6d28d9;
+            margin-bottom: 10px;
+        }
+        .goal-details-popup p {
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        .progress-ring-large {
+            width: 120px;
+            height: 120px;
+            margin: 16px auto;
+            position: relative;
+            transform: rotate(-90deg);
+        }
+        .progress-percent-text-large {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            fill: #a78bfa;
+            font-weight: bold;
+        }
+        .goal-details-popup button {
+            margin-top: 16px;
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .goal-details-popup button:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-100 to-purple-200 min-h-screen flex flex-col items-center justify-center p-6">
+
+    <div class="max-w-md w-full">
+        <h1 class="text-2xl font-bold text-center text-purple-600 mb-6">เป้าหมายการเก็บเงิน 💖</h1>
+
+        <button onclick="showAddGoalPopup()" class="add-new-goal-btn">เพิ่มเป้าหมายใหม่ ➕</button>
+
+        <div id="goals-list">
+            </div>
+    </div>
+
+    <div id="add-goal-popup" class="popup">
+        <h2 class="text-xl font-bold text-purple-600 mb-4">ตั้งเป้าหมายใหม่</h2>
+        <div>
+            <label for="new-target-name">ชื่อสินค้า</label>
+            <input type="text" id="new-target-name" class="mb-2 w-full p-2 rounded-lg border-2 border-purple-300 focus:ring-2 focus:ring-purple-400" placeholder="เช่น โทรศัพท์มือถือ">
+        </div>
+        <div>
+            <label for="new-target-price">ราคาสินค้า (บาท)</label>
+            <input type="number" id="new-target-price" class="mb-2 w-full p-2 rounded-lg border-2 border-purple-300 focus:ring-2 focus:ring-purple-400" placeholder="เช่น 3000">
+        </div>
+        <div>
+            <label for="new-upload-image">รูปภาพสินค้า</label>
+            <input type="file" id="new-upload-image" accept="image/*" class="mb-2 w-full">
+        </div>
+        <button class="confirm" onclick="addNewGoal()">บันทึก</button>
+        <button class="cancel" onclick="hideAddGoalPopup()">ยกเลิก</button>
+    </div>
+
+    <div id="goal-details-popup" class="goal-details-popup">
+        <h2 id="details-goal-name"></h2>
+        <div class="progress-ring-large">
+            <svg width="120" height="120">
+                <circle cx="60" cy="60" r="50" stroke="#ddd" stroke-width="8" fill="none" />
+                <circle id="details-progress-bar" cx="60" cy="60" r="50" stroke="#a78bfa" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" />
+            </svg>
+            <text id="details-progress-percent" x="60" y="65" text-anchor="middle" font-size="20" fill="#a78bfa"></text>
+        </div>
+        <p>ราคาสินค้า: <span id="details-target-price"></span> บาท</p>
+        <p>เก็บได้แล้ว: <span id="details-saved-amount"></span> บาท</p>
+        <button onclick="closeGoalDetailsPopup()">ปิด</button>
+    </div>
+
+    <script>
+let goals = JSON.parse(localStorage.getItem('savingGoals')) || [];
+const goalsListDiv = document.getElementById('goals-list');
+const addGoalPopup = document.getElementById('add-goal-popup');
+const goalDetailsPopup = document.getElementById('goal-details-popup');
+const detailsGoalName = document.getElementById('details-goal-name');
+const detailsProgressBar = document.getElementById('details-progress-bar');
+const detailsProgressPercent = document.getElementById('details-progress-percent');
+const detailsTargetPrice = document.getElementById('details-target-price');
+const detailsSavedAmount = document.getElementById('details-saved-amount');
+
+function showAddGoalPopup() {
+    addGoalPopup.style.display = 'block';
+}
+
+function hideAddGoalPopup() {
+    addGoalPopup.style.display = 'none';
+    document.getElementById('new-target-name').value = '';
+    document.getElementById('new-target-price').value = '';
+    document.getElementById('new-upload-image').value = '';
+}
+
+function addNewGoal() {
+    const name = document.getElementById('new-target-name').value;
+    const price = parseFloat(document.getElementById('new-target-price').value);
+    const imageFile = document.getElementById('new-upload-image').files[0];
+
+    if (name && !isNaN(price) && imageFile) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const newGoal = {
+                id: Date.now(),
+                name: name,
+                targetPrice: price,
+                savedAmount: 0,
+                imageUrl: e.target.result
+            };
+            goals.unshift(newGoal);
+            localStorage.setItem('savingGoals', JSON.stringify(goals));
+            renderGoals();
+            hideAddGoalPopup();
+        }
+        reader.readAsDataURL(imageFile);
+    } else if (name && !isNaN(price) && !imageFile) {
+        const newGoal = {
+            id: Date.now(),
+            name: name,
+            targetPrice: price,
+            savedAmount: 0,
+            imageUrl: 'https://via.placeholder.com/80'
+        };
+        goals.unshift(newGoal);
+        localStorage.setItem('savingGoals', JSON.stringify(goals));
+        renderGoals();
+        hideAddGoalPopup();
+    } else {
+        alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+    }
+}
+
+function renderGoals() {
+    goalsListDiv.innerHTML = '';
+    goals.forEach(goal => {
+        const goalDiv = document.createElement('div');
+        goalDiv.classList.add('goal-item');
+        goalDiv.innerHTML = `
+            <div class="goal-image-container">
+                <img src="${goal.imageUrl}" alt="${goal.name}" class="goal-image">
+            </div>
+            <div class="goal-details">
+                <h3 class="font-semibold text-lg text-purple-600">${goal.name}</h3>
+                <p class="text-gray-700">ราคา: ${goal.targetPrice.toLocaleString()} บาท</p>
+                <p class="text-gray-700">เก็บได้: <span id="saved-amount-${goal.id}">${goal.savedAmount.toLocaleString()}</span> บาท</p>
+                <div class="goal-actions mt-2">
+                    <button onclick="showGoalDetails(${goal.id})">ดูรายละเอียด</button>
+                    <button onclick="showAddSavingsPopup(${goal.id}, '${goal.name}')" class="bg-green-500 hover:bg-green-600">เพิ่มเงิน</button>
+                    <button onclick="deleteGoal(${goal.id})" class="bg-red-500 hover:bg-red-600">ลบ</button>
+                </div>
+            </div>
+        `;
+        goalsListDiv.appendChild(goalDiv);
+    });
+}
+
+
+function calculatePercentage(saved, target) {
+    const percent = target > 0 ? (saved / target) * 100 : 0;
+    return percent > 100 ? 100 : percent.toFixed(1);
+}
+
+function showGoalDetails(goalId) {
+    const goal = goals.find(g => g.id === goalId);
+    if (goal) {
+        detailsGoalName.innerText = goal.name;
+        detailsTargetPrice.innerText = goal.targetPrice.toLocaleString();
+        detailsSavedAmount.innerText = goal.savedAmount.toLocaleString();
+        
+        const percent = calculatePercentage(goal.savedAmount, goal.targetPrice);
+        detailsProgressBar.style.strokeDashoffset = 314 - (314 * percent / 100);
+        detailsProgressPercent.textContent = `${percent}%`;
+
+        goalDetailsPopup.style.display = 'block';
+    }
+}
+
+function closeGoalDetailsPopup() {
+    goalDetailsPopup.style.display = 'none';
+}
+
+
+function closeGoalDetailsPopup() {
+    goalDetailsPopup.style.display = 'none';
+}
+
+let currentGoalId = null;
+let currentGoalName = '';
+
+function showAddSavingsPopup(goalId, goalName) {
+    currentGoalId = goalId;
+    currentGoalName = goalName;
+
+    const existingPopup = document.getElementById('add-savings-popup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+
+    const popupDiv = document.createElement('div');
+    popupDiv.id = 'add-savings-popup';
+    popupDiv.classList.add('popup');
+    popupDiv.innerHTML = `
+        <h2 class="text-xl font-bold text-purple-600 mb-4">เพิ่มเงินเก็บสำหรับ "${goalName}"</h2>
+        <div>
+            <label for="add-amount">จำนวนเงินที่ต้องการเพิ่ม (บาท)</label>
+            <input type="number" id="add-amount" class="mb-4 w-full p-2 rounded-lg border-2 border-purple-300 focus:ring-2 focus:ring-purple-400" placeholder="เช่น 100">
+        </div>
+        <button class="confirm" onclick="addSavingsToGoal()">ยืนยัน</button>
+        <button class="cancel" onclick="closeAddSavingsPopup()">ยกเลิก</button>
+    `;
+    document.body.appendChild(popupDiv);
+    popupDiv.style.display = 'block';
+}
+
+function closeAddSavingsPopup() {
+    const popup = document.getElementById('add-savings-popup');
+    if (popup) {
+        popup.style.display = 'none';
+    }
+    currentGoalId = null;
+    currentGoalName = '';
+}
+
+function addSavingsToGoal() {
+    const amountToAdd = parseFloat(document.getElementById('add-amount').value);
+    if (!isNaN(amountToAdd) && currentGoalId !== null) {
+        let updatedGoal;
+        goals = goals.map(goal => {
+            if (goal.id === currentGoalId) {
+                goal.savedAmount += amountToAdd;
+                updatedGoal = goal; // เก็บเป้าหมายที่อัปเดต
+            }
+            return goal;
+        });
+        localStorage.setItem('savingGoals', JSON.stringify(goals));
+        renderGoals();
+        closeAddSavingsPopup();
+
+        // บันทึกประวัติการออมเงิน
+        if (updatedGoal) {
+            const now = new Date();
+            const date = now.toLocaleDateString('th-TH');
+            const time = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            const percent = calculatePercentage(updatedGoal.savedAmount, updatedGoal.targetPrice);
+
+            const historyRecord = {
+                date: date,
+                time: time,
+                goalName: updatedGoal.name,
+                amount: amountToAdd,
+                percent: percent,
+                imageUrl: updatedGoal.imageUrl // เพิ่ม URL รูปภาพ
+            };
+
+            let savingHistory = JSON.parse(localStorage.getItem('savingHistory')) || [];
+            savingHistory.unshift(historyRecord); // เพิ่มรายการใหม่ที่ด้านหน้า
+            localStorage.setItem('savingHistory', JSON.stringify(savingHistory));
+        }
+    } else {
+        alert('กรุณากรอกจำนวนเงินที่ต้องการเพิ่ม');
+    }
+}
+
+function calculatePercentage(saved, target) {
+    const percent = target > 0 ? (saved / target) * 100 : 0;
+    return percent > 100 ? 100 : percent.toFixed(1);
+}
+
+function deleteGoal(goalId) {
+    if (confirm('คุณต้องการลบเป้าหมายนี้หรือไม่?')) {
+        goals = goals.filter(goal => goal.id !== goalId);
+        localStorage.setItem('savingGoals', JSON.stringify(goals));
+        renderGoals();
+    }
+}
+
+renderGoals();
+
+    </script>
+
+</body>
+</html>
