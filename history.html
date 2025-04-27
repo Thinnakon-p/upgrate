@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ประวัติการออมเงิน</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f0f0f0;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: start;
+        }
+
+        h1 {
+            margin-top: 40px;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #222;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            animation: fadeInDown 1s ease forwards;
+        }
+
+        @keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        table {
+            width: 90%;
+            max-width: 1000px;
+            border-collapse: collapse;
+            margin-top: 30px;
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            animation: fadeInUp 1.2s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #333;
+            color: #fff;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        tr {
+            transition: background-color 0.3s ease;
+        }
+
+        tr:hover {
+            background-color: #e0e0e0;
+        }
+
+        .goal-image-small {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            vertical-align: middle;
+            margin-right: 10px;
+            border: 2px solid #333;
+        }
+
+        td {
+            color: #555;
+            font-size: 1rem;
+        }
+
+        /* ปรับแต่งเปอร์เซ็นต์ให้โดดเด่น */
+        .percent-cell {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #000;
+        }
+
+        /* เพิ่มเส้นขีดที่หัวข้อ */
+        h1::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: #000;
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ประวัติการออมเงิน</h1>
+
+    <table id="history-table">
+        <thead>
+            <tr>
+                <th>วันที่</th>
+                <th>เวลา</th>
+                <th>เป้าหมาย</th>
+                <th>จำนวนเงินที่ออม (บาท)</th>
+                <th>เปอร์เซ็นต์ (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- ข้อมูลจะถูกแทรกที่นี่ด้วย JavaScript -->
+        </tbody>
+    </table>
+
+    <script>
+        const historyTableBody = document.querySelector('#history-table tbody');
+        const savingHistory = JSON.parse(localStorage.getItem('savingHistory')) || [];
+
+        function calculatePercentage(saved, target) {
+            const percent = target > 0 ? (saved / target) * 100 : 0;
+            return percent > 100 ? 100 : percent.toFixed(1);
+        }
+
+        savingHistory.forEach(record => {
+            const row = document.createElement('tr');
+            const percent = calculatePercentage(record.amount, record.targetAmount);
+
+            row.innerHTML = `
+                <td>${record.date}</td>
+                <td>${record.time}</td>
+                <td>
+                    <img src="${record.imageUrl ? record.imageUrl : 'default.jpg'}" 
+                         alt="${record.goalName}" 
+                         class="goal-image-small">
+                    ${record.goalName}
+                    <div style="font-size: 12px; color: gray;">
+                        (เป้าหมาย: ${record.targetAmount.toLocaleString()} บาท)
+                    </div>
+                </td>
+                <td>${record.amount.toLocaleString()}</td>
+                <td class="percent-cell">${percent}%</td>
+            `;
+            historyTableBody.appendChild(row);
+        });
+    </script>
+
+</body>
+</html>
