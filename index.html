@@ -536,17 +536,22 @@
               <label for="add-amount">จำนวนเงินที่ต้องการเพิ่ม (บาท)</label>
               <input type="number" id="add-amount" class="mb-4 w-full p-2 rounded-lg border-2 border-purple-300 focus:ring-2 focus:ring-purple-400" placeholder="เช่น 100" min="0.01" step="0.01" autocomplete="off" />
           </div>
-          <button class="confirm" onclick="addSavingsToGoal()">ยืนยัน</button>
+          <button class="confirm" onclick="generatePromptPayQRCode()">สร้าง QR พร้อมเพย์</button>
           <button class="cancel" onclick="closeAddSavingsPopup()">ยกเลิก</button>
           <div id="qr-code-wrapper" class="mt-6 text-center hidden">
             <div class="qr-cool-text">สแกน QR พร้อมเพย์เพื่อโอนเงิน 💸✨</div>
             <canvas id="qr-code-canvas" aria-label="QR code สำหรับโอนเงิน"></canvas>
             <div id="qr-amount-text" class="mt-2 text-green-400 font-semibold"></div>
+            <button id="confirm-payment-btn" class="confirm mt-4 w-full">ยืนยันว่าโอนเงินแล้ว</button>
           </div>
       `;
       document.body.appendChild(popupDiv);
       popupDiv.style.display = 'block';
       document.getElementById('add-amount').focus();
+
+      // Hide confirm payment button initially
+      document.getElementById('confirm-payment-btn').style.display = 'none';
+      document.getElementById('confirm-payment-btn').onclick = confirmPaymentDone;
     }
 
     function closeAddSavingsPopup() {
@@ -560,83 +565,83 @@
     }
 
     // PromptPay mobile number or ID for QR code generation
-    // Replace with your real PromptPay ID or mobile number (without dashes or spaces)
-    const promptPayId = '0812345678';
+    // Updated to your number:
+    const promptPayId = '0863185926';
 
-    function addSavingsToGoal() {
+    function generatePromptPayQRCode() {
       const amountInput = document.getElementById('add-amount');
       const amountToAdd = parseFloat(amountInput.value);
-      if (!isNaN(amountToAdd) && amountToAdd > 0 && currentGoalId !== null) {
-        // Show QR code for PromptPay payment with this amount
-        const qrWrapper = document.getElementById('qr-code-wrapper');
-        const qrCanvas = document.getElementById('qr-code-canvas');
-        const qrAmountText = document.getElementById('qr-amount-text');
-
-        // Generate PromptPay payload string
-        const payload = buildPromptPayPayload(promptPayId, amountToAdd);
-
-        // Generate QR code on canvas
-        QRCode.toCanvas(qrCanvas, payload, { width: 180, margin: 2, color: { dark: '#a78bfa', light: '#222' } }, function (error) {
-          if (error) {
-            alert('เกิดข้อผิดพลาดในการสร้าง QR Code');
-            console.error(error);
-            qrWrapper.classList.add('hidden');
-            return;
-          }
-          qrWrapper.classList.remove('hidden');
-          qrAmountText.textContent = `จำนวนเงิน: ${amountToAdd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท`;
-        });
-
-        // Disable inputs and buttons except cancel to prevent multiple submits
-        amountInput.disabled = true;
-        const confirmBtn = document.querySelector('#add-savings-popup button.confirm');
-        confirmBtn.disabled = true;
-
-        // Add a new button to confirm payment done and update saved amount
-        if (!document.getElementById('confirm-payment-btn')) {
-          const confirmPaymentBtn = document.createElement('button');
-          confirmPaymentBtn.id = 'confirm-payment-btn';
-          confirmPaymentBtn.className = 'confirm mt-4 w-full';
-          confirmPaymentBtn.textContent = 'ยืนยันว่าโอนเงินแล้ว';
-          confirmPaymentBtn.onclick = function () {
-            // Update saved amount and save history
-            let updatedGoal;
-            goals = goals.map((goal) => {
-              if (goal.id === currentGoalId) {
-                goal.savedAmount += amountToAdd;
-                updatedGoal = goal;
-              }
-              return goal;
-            });
-            localStorage.setItem('savingGoals', JSON.stringify(goals));
-            renderGoals();
-            closeAddSavingsPopup();
-
-            if (updatedGoal) {
-              const now = new Date();
-              const date = now.toLocaleDateString('th-TH');
-              const time = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-              const percent = calculatePercentage(updatedGoal.savedAmount, updatedGoal.targetPrice);
-
-              const historyRecord = {
-                date: date,
-                time: time,
-                goalName: updatedGoal.name,
-                amount: amountToAdd,
-                percent: percent,
-                imageUrl: updatedGoal.imageUrl,
-                targetAmount: updatedGoal.targetPrice,
-              };
-
-              let savingHistory = JSON.parse(localStorage.getItem('savingHistory')) || [];
-              savingHistory.unshift(historyRecord);
-              localStorage.setItem('savingHistory', JSON.stringify(savingHistory));
-            }
-          };
-          document.getElementById('add-savings-popup').appendChild(confirmPaymentBtn);
-        }
-      } else {
+      if (isNaN(amountToAdd) || amountToAdd <= 0) {
         alert('กรุณากรอกจำนวนเงินที่ต้องการเพิ่มให้ถูกต้องและมากกว่า 0');
+        return;
+      }
+
+      const qrWrapper = document.getElementById('qr-code-wrapper');
+      const qrCanvas = document.getElementById('qr-code-canvas');
+      const qrAmountText = document.getElementById('qr-amount-text');
+      const confirmPaymentBtn = document.getElementById('confirm-payment-btn');
+
+      // Generate PromptPay payload string
+      const payload = buildPromptPayPayload(promptPayId, amountToAdd);
+
+      // Generate QR code on canvas
+      QRCode.toCanvas(qrCanvas, payload, { width: 180, margin: 2, color: { dark: '#a78bfa', light: '#222' } }, function (error) {
+        if (error) {
+          alert('เกิดข้อผิดพลาดในการสร้าง QR Code');
+          console.error(error);
+          qrWrapper.classList.add('hidden');
+          confirmPaymentBtn.style.display = 'none';
+          return;
+        }
+        qrWrapper.classList.remove('hidden');
+        qrAmountText.textContent = `จำนวนเงิน: ${amountToAdd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท`;
+        confirmPaymentBtn.style.display = 'block';
+      });
+
+      // Disable inputs and buttons except cancel and confirm payment
+      amountInput.disabled = true;
+      document.querySelector('#add-savings-popup button.confirm').disabled = true;
+    }
+
+    function confirmPaymentDone() {
+      const amountInput = document.getElementById('add-amount');
+      const amountToAdd = parseFloat(amountInput.value);
+      if (isNaN(amountToAdd) || amountToAdd <= 0 || currentGoalId === null) {
+        alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+        return;
+      }
+
+      let updatedGoal;
+      goals = goals.map((goal) => {
+        if (goal.id === currentGoalId) {
+          goal.savedAmount += amountToAdd;
+          updatedGoal = goal;
+        }
+        return goal;
+      });
+      localStorage.setItem('savingGoals', JSON.stringify(goals));
+      renderGoals();
+      closeAddSavingsPopup();
+
+      if (updatedGoal) {
+        const now = new Date();
+        const date = now.toLocaleDateString('th-TH');
+        const time = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+        const percent = calculatePercentage(updatedGoal.savedAmount, updatedGoal.targetPrice);
+
+        const historyRecord = {
+          date: date,
+          time: time,
+          goalName: updatedGoal.name,
+          amount: amountToAdd,
+          percent: percent,
+          imageUrl: updatedGoal.imageUrl,
+          targetAmount: updatedGoal.targetPrice,
+        };
+
+        let savingHistory = JSON.parse(localStorage.getItem('savingHistory')) || [];
+        savingHistory.unshift(historyRecord);
+        localStorage.setItem('savingHistory', JSON.stringify(savingHistory));
       }
     }
 
